@@ -157,7 +157,8 @@ jobs:
 
     - name: Install Shopify CLI
       run: |
-        curl -sS https://shopify.dev/unix/install | sh
+        wget -qO- https://github.com/Shopify/shopify-cli/releases/latest/download/shopify-cli-linux-amd64 | sudo tee /usr/local/bin/shopify > /dev/null
+        sudo chmod +x /usr/local/bin/shopifycurl -sS https://shopify.dev/unix/install | sh
 
     - name: Stop Shopify app tunnel
       run: shopify app tunnel stop
