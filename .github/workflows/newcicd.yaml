@@ -34,12 +34,10 @@ jobs:
         docker build -t ${{ secrets.DOCKER_USERNAME }}/wisecowrepo:$IMAGE_TAG .
         docker push ${{ secrets.DOCKER_USERNAME }}/wisecowrepo:$IMAGE_TAG
         echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
-
     # Update deployment.yaml with new image tag
     - name: Update deployment.yaml with new image tag
       run: |
         sed -i "s|image: ${{ secrets.DOCKER_USERNAME }}/wisecowrepo:.*|image: ${{ secrets.DOCKER_USERNAME }}/wisecowrepo:${{ env.IMAGE_TAG }}|g" deployment.yaml
-
     # Commit and push updated deployment.yaml
     - name: Commit and push updated deployment.yaml
       env:
@@ -50,13 +48,11 @@ jobs:
         git add deployment.yaml
         git commit -m "Update deployment image to ${{ secrets.DOCKER_USERNAME }}/wisecowrepo:${{ env.IMAGE_TAG }}"
         git push origin HEAD:main
-
     # Install OpenSSL
     - name: Install OpenSSL
       run: |
         sudo apt-get update
         sudo apt-get install -y openssl
-
     # Generate TLS certificates
     - name: Generate TLS certificates
       run: |
@@ -64,24 +60,20 @@ jobs:
           -keyout tls.key -out tls.crt \
           -subj "/C=IN/ST=Karnataka/L=Bangalore/O=My Company/CN=wisecow.com" \
           -addext "subjectAltName=DNS:wisecow.com,DNS:www.wisecow.com"
-
     # Start Minikube
     - name: Start Minikube
       run: |
         minikube start --driver=docker
-
     # Check status of Minikube
     - name: Status of Minikube
       run: |
         minikube status
-
     # Wait for Minikube to be ready
     - name: Wait for Minikube to be ready
       run: |
         until minikube status | grep -q "host: Running"; do sleep 5; done
         until minikube status | grep -q "kubelet: Running"; do sleep 5; done
         until minikube status | grep -q "apiserver: Running"; do sleep 5; done
-
     # Set up kubectl
     - name: Set up kubectl
       uses: azure/setup-kubectl@v1
@@ -94,22 +86,18 @@ jobs:
         mkdir -p $HOME/.kube
         export KUBECONFIG=$HOME/.kube/config
         minikube update-context
-
     # Create ingress-nginx namespace if not exists
     - name: Create ingress-nginx namespace if not exists
       run: |
         kubectl create namespace ingress-nginx || true
-
     # Deploy Ingress Controller
     - name: Deploy Ingress Controller
       run: |
         kubectl apply -f deploy.yaml -n ingress-nginx
-
     # Verify Ingress Controller Deployment
     - name: Verify Ingress Controller Deployment
       run: |
         kubectl get all -n ingress-nginx
-
     # Wait for Ingress Controller to be ready
     - name: Wait for Ingress Controller to be ready
       run: |
@@ -117,25 +105,21 @@ jobs:
           --for=condition=ready pod \
           --selector=app.kubernetes.io/component=controller \
           --timeout=300s || kubectl describe all -n ingress-nginx
-
     # Wait for Webhook Service to be ready
     - name: Wait for Webhook Service to be ready
       run: |
         kubectl wait --namespace ingress-nginx \
           --for=condition=available svc/ingress-nginx-controller-admission \
           --timeout=150s || kubectl describe svc/ingress-nginx-controller-admission -n ingress-nginx
-
     # Create Kubernetes secret for TLS
     - name: Create Kubernetes secret for TLS
       run: |
         kubectl create namespace wisecow || true
         kubectl create secret tls wisecow-tls --cert=tls.crt --key=tls.key -n wisecow
-
     # Verify TLS secret
     - name: Verify TLS secret
       run: |
         kubectl get secret wisecow-tls -n wisecow
-
     # Deploy Application with Retries
     - name: Deploy Application with Retries
       run: |
@@ -145,7 +129,6 @@ jobs:
           kubectl apply -f ingress.yaml -n wisecow && break || \
           { echo "Retry $i..."; sleep 15; }
         done
-
     # Wait for 30 seconds
     - name: Wait for 30 seconds
       run: sleep 30
@@ -156,21 +139,18 @@ jobs:
         kubectl get pods -n wisecow
         kubectl get svc -n wisecow
         kubectl get ingress -n wisecow
-
     # Describe Resources for Debugging
     - name: Describe Resources for Debugging
       run: |
         kubectl describe pods -n wisecow
         kubectl describe svc -n wisecow
         kubectl describe ingress -n wisecow
-
     # Get Minikube IP
     - name: Get Minikube IP
       id: get_minikube_ip
       run: |
         MINIKUBE_IP=$(minikube ip)
         echo "MINIKUBE_IP=$MINIKUBE_IP" >> $GITHUB_ENV
-
     # Display Minikube IP
     - name: Display Minikube IP
       run: echo "Add the following line to your /etc/hosts file:${{ env.MINIKUBE_IP }} wisecow.com"
@@ -181,48 +161,20 @@ jobs:
       run: |
         NODE_PORT=$(kubectl get svc wisecow-service -n wisecow -o=jsonpath='{.spec.ports[0].nodePort}')
         echo "NODE_PORT=$NODE_PORT" >> $GITHUB_ENV
-
-    # Install Node.js and Git (requirements for Shopify CLI)
-    - name: Install Node.js and Git
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y git
-        curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-        sudo apt-get install -y nodejs
-
-    # Install Shopify CLI
-    - name: Install Shopify CLI
-      run: |
-        LATEST_URL=$(curl -s https://api.github.com/repos/Shopify/shopify-cli/releases/latest | jq -r '.assets[] | select(.name | test("shopify-cli-linux-amd64")) | .browser_download_url')
-        wget -O shopify $LATEST_URL
-        sudo mv shopify /usr/local/bin/
-        sudo chmod +x /usr/local/bin/shopify
-
-    # Stop Shopify app tunnel
-    - name: Stop Shopify app tunnel
-      run: shopify app tunnel stop
-
-    # Serve Shopify app
-    - name: Serve Shopify app
-      run: shopify app serve
-
     # Install the latest version of Ngrok
     - name: Install Ngrok
       run: |
         curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc > /dev/null
         echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list
         sudo apt-get update && sudo apt-get install ngrok
-
     # Add Ngrok authtoken
     - name: Add Ngrok Authtoken
       run: |
         ngrok authtoken ${{ secrets.NGROK_AUTHTOKEN }}
-
     # Start Ngrok
     - name: Start Ngrok
       run: |
         nohup ngrok http ${{ env.MINIKUBE_IP }}:${{ env.NODE_PORT }} > ngrok.log 2>&1 &
-
     # Wait for Ngrok to Start
     - name: Wait for Ngrok to Start
       run: sleep 15
@@ -231,14 +183,12 @@ jobs:
     - name: Check Ngrok Logs
       run: |
         cat ngrok.log
-
     # Get Ngrok URL
     - name: Get Ngrok URL
       id: get_ngrok_url
       run: |
         NGROK_URL=$(curl --silent --show-error http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url')
         echo "NGROK_URL=$NGROK_URL" >> $GITHUB_ENV
-
     # Display Application URL
     - name: Display Application URL
       run: echo "Access your application at ${{ env.NGROK_URL }}"
@@ -247,7 +197,6 @@ jobs:
     - name: Fetch Ingress Controller Logs
       run: |
         kubectl logs -l app.kubernetes.io/component=controller -n ingress-nginx
-
     # Check Deployment Status Again
     - name: Check Deployment Status Again
       run: |
