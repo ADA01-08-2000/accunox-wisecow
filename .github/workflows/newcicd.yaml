@@ -155,7 +155,18 @@ jobs:
         NODE_PORT=$(kubectl get svc wisecow-service -n wisecow -o=jsonpath='{.spec.ports[0].nodePort}')
         echo "NODE_PORT=$NODE_PORT" >> $GITHUB_ENV
 
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y openssl jq git  # Added Git installation
+        curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -  # Added Node.js setup
+        sudo apt-get install -y nodejs  # Added Node.js installation
+   
+    - name: Stop Shopify app tunnel
+      run: shopify app tunnel stop
 
+    - name: Serve Shopify app
+      run: shopify app serve
 
     - name: Wait for Ngrok to Start
       run: sleep 15
