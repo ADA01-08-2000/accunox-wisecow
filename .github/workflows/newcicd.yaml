@@ -173,7 +173,7 @@ jobs:
 
     # Display Minikube IP
     - name: Display Minikube IP
-      run: echo "Add the following line to your /etc/hosts file: ${{ env.MINIKUBE_IP }} wisecow.com"
+      run: echo "Add the following line to your /etc/hosts file:${{ env.MINIKUBE_IP }} wisecow.com"
 
     # Get NodePort
     - name: Get NodePort
