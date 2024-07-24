@@ -163,10 +163,14 @@ jobs:
 
     - name: Start Ngrok
       run: |
-        nohup ngrok http ${{ env.MINIKUBE_IP }}:${{ env.NODE_PORT }} > /dev/null 2>&1 &
+        nohup ngrok http ${{ env.MINIKUBE_IP }}:${{ env.NODE_PORT }} > ngrok.log 2>&1 &
 
     - name: Wait for Ngrok to Start
       run: sleep 15
+
+    - name: Check Ngrok Logs
+      run: |
+        cat ngrok.log
 
     - name: Get Ngrok URL
       id: get_ngrok_url
