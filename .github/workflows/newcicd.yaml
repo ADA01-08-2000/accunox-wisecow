@@ -169,7 +169,7 @@ jobs:
       id: get_ngrok_url
       run: |
         sleep 10
-        NGROK_URL=$(curl --silent --show-error http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url')
+        NGROK_URL=$(curl --silent --show-error http://localhost:80/api/tunnels | jq -r '.tunnels[0].public_url')
         echo "NGROK_URL=$NGROK_URL" >> $GITHUB_ENV
 
     - name: Display Application URL
