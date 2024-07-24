@@ -123,7 +123,7 @@ jobs:
       run: |
         kubectl wait --namespace ingress-nginx \
           --for=condition=available svc/ingress-nginx-controller-admission \
-          --timeout=300s || kubectl describe svc/ingress-nginx-controller-admission -n ingress-nginx
+          --timeout=150s || kubectl describe svc/ingress-nginx-controller-admission -n ingress-nginx
 
     # Create Kubernetes secret for TLS
     - name: Create Kubernetes secret for TLS
