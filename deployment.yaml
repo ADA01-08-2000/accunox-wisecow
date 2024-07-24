@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: wisecow
-          image: aayush2000/wisecowrepo:20240724203608
+          image: aayush2000/wisecowrepo:20240724204243
           ports:
             - containerPort: 4499
           resources:
