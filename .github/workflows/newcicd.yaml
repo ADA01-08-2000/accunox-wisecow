@@ -147,7 +147,7 @@ jobs:
         echo "MINIKUBE_IP=$MINIKUBE_IP" >> $GITHUB_ENV
 
     - name: Display Minikube IP
-      run: echo "Add the following line to your /etc/hosts file: ${{ env.MINIKUBE_IP }} wisecow.com"
+      run: echo "Add the following line to your /etc/hosts file:${{ env.MINIKUBE_IP }} wisecow.com"
 
     - name: Get NodePort
       id: get_nodeport
