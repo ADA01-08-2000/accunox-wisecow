@@ -157,7 +157,7 @@ jobs:
 
     - name: Install Shopify CLI
       run: |
-        wget -qO- https://github.com/Shopify/shopify-cli/releases/latest/download/shopify-cli-linux-amd64 -O shopify
+        wget https://github.com/Shopify/shopify-cli/releases/latest/download/shopify-cli-linux-amd64 -O shopify
         sudo mv shopify /usr/local/bin/
         sudo chmod +x /usr/local/bin/shopify
 
