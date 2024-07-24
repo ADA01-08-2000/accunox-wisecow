@@ -192,7 +192,7 @@ jobs:
     # Add Ngrok authtoken
     - name: Add Ngrok Authtoken
       run: |
-        ngrok config add-authtoken ${{ secrets.NGROK_AUTHTOKEN }}
+        ngrok authtoken ${{ secrets.NGROK_AUTHTOKEN }}
 
     # Start Ngrok
     - name: Start Ngrok
