@@ -61,6 +61,11 @@ jobs:
       run: |
         minikube start --driver=docker
 
+    - name: Staatus of  Minikube
+      run: |
+        minikube status
+
+
     - name: Wait for Minikube to be ready
       run: |
         until minikube status | grep -q "host: Running"; do sleep 5; done
