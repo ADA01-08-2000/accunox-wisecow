@@ -11,4 +11,4 @@ RUN chmod +x wisecow.sh
 
 EXPOSE 4499
 
-CMD ["sh", "-c", "wisecow.sh"]
+CMD ["sh", "-c", "/wisecow/wisecow.sh"]
