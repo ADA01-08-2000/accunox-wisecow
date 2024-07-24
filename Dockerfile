@@ -1,6 +1,6 @@
 FROM ubuntu:22.04
 
-WORKDIR /wisecowapp
+WORKDIR /wisecow
 
 RUN apt-get update && \
     apt-get install -y cowsay fortune-mod netcat-openbsd && \
